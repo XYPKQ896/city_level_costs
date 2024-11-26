@@ -1,44 +1,48 @@
 #### Preamble ####
-# Purpose: Cleans the raw plane data recorded by two observers..... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 6 April 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Cleans the raw data, rename the predictors.
+# Author: Rui Hu
+# Date: 11 November 2024
+# Contact: hr.hu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: NA
+# Any other information needed? NA
 
 #### Workspace setup ####
 library(tidyverse)
 
 #### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
+raw_data <- read_csv("data/01-raw_data/original_data.csv", skip = 1)
+raw_data <- raw_data %>% rename(Average_HH_Size = `Average HH Size`, 
+                                Number_of_HH = `Number of HH`,
+                                Monthly_Income = 
+                                  `Average Monthly Household Income of the Lowest Quintile of Population (USD 2019)`,
+                                Existing_Open_Space = 
+                                  `Existing Open Space (Sq. Km)`,
+                                Public_Space_Cost = 
+                                  `Total Public Space Cost from 2019-2030 (USD 2019)`,
+                                Percentage_of_HH_in_Need_of_Adequate_Housing_Upgrades
+                                = `Percentage of HH in Need of Adequate Housing Upgrades`,
+                                Average_Market_Price_of_an_Adequate_Home = 
+                                  `Average Market Price of an Adequate Home 550 sqft (USD 2019)`,
+                                Average_Monthly_Rent_of_an_Adequate_Home =
+                                  `Average Monthly Rent of an Adequate Home 550 SqFt per month (USD 2019.)`,
+                                Total_Housing_Cost_from = 
+                                  `Total Housing Cost from 2019-2030 (USD 2019)`,
+                                Total_Governance_Cost = 
+                                  `Total Governance Cost from 2019-2030 (USD 2019)`
+                                )
 
-cleaned_data <-
-  raw_data |>
-  janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
-  mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
-  ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
-  mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
-  ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+
+
+cleaned_data <- raw_data %>% select(City, Country, Population, Size, 
+                                    Average_HH_Size, Number_of_HH, 
+                                    Monthly_Income, Existing_Open_Space, 
+                                    Public_Space_Cost, 
+                                    Percentage_of_HH_in_Need_of_Adequate_Housing_Upgrades
+                                    , Average_Market_Price_of_an_Adequate_Home,
+                                    Average_Monthly_Rent_of_an_Adequate_Home,
+                                    Total_Housing_Cost_from,
+                                    Total_Governance_Cost)
 
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+write_csv(cleaned_data, "data/02-analysis_data/analysis_data.csv")

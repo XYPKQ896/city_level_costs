@@ -1,8 +1,8 @@
-# Starter folder
+# Analyzing the Relationship Between socioeconomic factors and Governance Costs
 
 ## Overview
 
-This repo provides students with a foundation for their own projects associated with *Telling Stories with Data*. You do not need every aspect for every paper and you should delete aspects that you do not need.
+This project aims to analyze city data using various predictors like population, income, housing, and space costs. The dataset provides valuable insights into urban planning and development, offering key metrics for decision-making.
 
 
 ## File Structure
@@ -19,7 +19,9 @@ The repo is structured as:
 
 ## Statement on LLM usage
 
-Aspects of the code were written with the help of the auto-complete tool, Codriver. The abstract and introduction were written with the help of ChatHorse and the entire chat history is available in inputs/llms/usage.txt.
+Aspects of the code were written with the help of the auto-complete tool, 
+GPT-4o mini. The abstract and introduction were written with the help of 
+GPT-4o mini and the entire chat history is available in inputs/llms/usage.txt.
 
 ## Some checks
 

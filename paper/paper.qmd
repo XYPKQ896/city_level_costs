@@ -1,13 +1,12 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Analyzing the Relationship Between socioeconomic factors and Governance Costs"
+subtitle: "A Study of population, income, living, price m public spaces and governance cost"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
-date: today
+  - Rui Hu
+thanks: "Code and data are available at: [https://github.com/XYPKQ896/city_level_costs](https://github.com/XYPKQ896/city_level_costs)."
+Date: 11 November 2024
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This study analyzes urban housing markets based on data from multiple cities, focusing on the relationship between population, size, household, income, public space availability, housing needs, market prices, and governance costs. The key variables included in this analysis are City, Country, Population, Household Size, Number of Households, Monthly Income, Existing Open Space, Public Space Costs, Percentage of Households in Need of Housing Upgrades, Market Prices, Rent, Total Housing Costs, and Governance Costs. This paper explores how these variables interact and the potential implications for urban planning and governance."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -19,62 +18,70 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(ggplot2)
+data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
 ```
 
 
 # Introduction
 
-Overview paragraph
+Urbanization has led to significant transformations in city structures and living conditions, placing pressure on housing markets and governance systems. As cities grow, the challenge of providing affordable housing, maintaining public spaces, and ensuring efficient governance becomes more complex. In this study, we analyze key variables such as population size, household income, housing market prices, public space availability, and governance costs in several cities. Our goal is to examine how these factors interrelate and provide insight into the broader implications for urban planning and policy.
 
-Estimand paragraph
-
+The primary estimand of this study is the relationship between household income, population size, housing affordability, and governance costs in urban areas. By examining variables such as the average household size, monthly income, the percentage of households in need of housing upgrades, and the associated costs of governance and public space maintenance, we aim to quantify how these factors influence the overall housing market and urban governance efficiency.
 Results paragraph
 
-Why it matters paragraph
+Understanding the relationship between income, housing demand, public space, and governance costs is crucial for designing urban policies that promote affordable housing and sustainable development. As cities continue to grow, failing to address these issues can lead to higher inequality, increased housing costs, and greater governance burdens. Insights from this study can help city planners and policymakers make informed decisions that balance growth with livability and fairness.
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
+Telegraphing paragraph: The remainder of this paper is structured as follows. 
+@sec-data Data, @sec-model Model, @sec-results Results, @sec-discussion Discussion.
 
 
 # Data {#sec-data}
 
 ## Overview
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
-
-Overview text
+We use the statistical programming language R [@citeR] for data analysis. 
+We use @ggplot2 to visualize the data.
+The data used in this study comes from the website [@aiddata]. The article 
+[@Costs_City] includes various socio-economic and urban metrics such as 
+population size, household income, housing costs, and public space availability 
+across different cities. Following the guidelines in Telling Stories with Data 
+[@tellingstories], we consider on the relationship between urban growth, housing 
+markets, public space, and governance costs. Our data captures a range of 
+variables that are integral to understanding the challenges of urban development 
+and housing affordability.
 
 ## Measurement
 	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+The data entries are a representation of real-world phenomena, such as 
+population, size and household income, which have been translated into 
+quantitative metrics through surveys and official records. For example, 
+population data comes from census reports, while housing-related variables, 
+such as the Average Monthly Rent of an Adequate Home, are sourced from market 
+assessments. Each variable has been carefully measured to ensure that it 
+accurately reflects the conditions in the cities under study.
 
 ## Outcome variables
 
 Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
 
 
-
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+### Population 
+Some of our data is of population (@fig-population), from @costs_City. 
+The total population of each city, which influences demand for housing and public services. Larger populations are often correlated with higher demand for housing and more complex governance challenges.
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
+#| label: fig-population
+#| fig-cap: Population across cities.
 #| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+ggplot(data = data, aes(x = City, y = Population)) +
+  geom_bar(stat = "identity") +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  labs(title = "Population Size Across Cities", x = "City", y = "Population Size") +
+  theme(axis.text.x = element_blank()) 
 ```
 
-Talk more about it.
+This variable shows the distribution of population across different cities, revealing notable variation between them. The city with the largest population is significantly larger than the others.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
@@ -85,14 +92,7 @@ And also planes (@fig-planes). (You can change the height and width, but don't w
 #| warning: false
 #| message: false
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
 ```
 
 Talk way more about it. 
@@ -110,7 +110,7 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 
 
 
-# Model
+# Model{#sec-model}
 
 The goal of our modelling strategy is twofold. Firstly,...
 
@@ -139,7 +139,7 @@ We expect a positive relationship between the size of the wings and time spent a
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
 
-# Results
+# Results{#sec-results}
 
 Our results are summarized in @tbl-modelresults.
 
@@ -151,8 +151,7 @@ Our results are summarized in @tbl-modelresults.
 
 library(rstanarm)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
+
 ```
 
 ```{r}
@@ -162,19 +161,13 @@ first_model <-
 #| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
 #| warning: false
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
+
 ```
 
 
 
 
-# Discussion
+# Discussion{#sec-discussion}
 
 ## First discussion point {#sec-first-point}
 
@@ -217,15 +210,7 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
 #| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
 ```
 
 ## Diagnostics
@@ -244,9 +229,7 @@ posterior_vs_prior(first_model) +
 #| fig-subcap: ["Trace plot", "Rhat plot"]
 #| layout-ncol: 2
 
-plot(first_model, "trace")
 
-plot(first_model, "rhat")
 ```
 
 
