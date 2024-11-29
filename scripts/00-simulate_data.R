@@ -4,8 +4,8 @@
 # Date: 27 November 2024
 # Contact: hr.hu@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: The `tidyverse` package must be installed
-# Any other information needed? Make sure you are in the `city_level_costs` rproj
+# Pre-requisites: The `tidyverse` and `arrow` package must be installed
+# Any other information needed? Make sure you are in the `housing_prices` rproj
 
 
 #### Workspace setup ####
@@ -38,4 +38,4 @@ analysis_data <- analysis_data[apply(analysis_data, 1, function(row) all(row >= 
 
 
 #### Save data ####
-write_parquet(analysis_data, "data/00-simulated_data/simulated_data.paquet")
+write_parquet(analysis_data, "data/00-simulated_data/simulated_data.parquet")
