@@ -1,52 +1,41 @@
 #### Preamble ####
-# Purpose: Simulates a dataset of Australian electoral divisions, including the 
-  #state and party that won each division.
-# Author: Rohan Alexander
-# Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
+# Purpose: Simulates a dataset of City Costs
+# Author: Rui Hu
+# Date: 27 November 2024
+# Contact: hr.hu@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: The `tidyverse` package must be installed
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+# Any other information needed? Make sure you are in the `city_level_costs` rproj
 
 
 #### Workspace setup ####
 library(tidyverse)
-set.seed(853)
+library(arrow)
+set.seed(304)
 
 
 #### Simulate data ####
-# State names
-states <- c(
-  "New South Wales",
-  "Victoria",
-  "Queensland",
-  "South Australia",
-  "Western Australia",
-  "Tasmania",
-  "Northern Territory",
-  "Australian Capital Territory"
-)
 
-# Political parties
-parties <- c("Labor", "Liberal", "Greens", "National", "Other")
+# Create a dataset by randomly assigning
+population <- rnorm(200, mean = 300000, sd = 300000)
+Average_HH_Size <- rnorm(200, mean = 4, sd = 1)
+Number_of_HH <- rnorm(200, mean = 300000, sd = 600000)
+monthly_income <- rnorm(200, mean = 70, sd = 30)
+percent_need_housing_upgrades <- runif(200, min = 0, max = 0.8)
+market_prices <- rnorm(200, mean = 40000, sd = 30000)
+rent <- rnorm(200, mean = 600, sd = 700)
 
-# Create a dataset by randomly assigning states and parties to divisions
-analysis_data <- tibble(
-  division = paste("Division", 1:151),  # Add "Division" to make it a character
-  state = sample(
-    states,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.25, 0.25, 0.15, 0.1, 0.1, 0.1, 0.025, 0.025) # Rough state population distribution
-  ),
-  party = sample(
-    parties,
-    size = 151,
-    replace = TRUE,
-    prob = c(0.40, 0.40, 0.05, 0.1, 0.05) # Rough party distribution
-  )
+analysis_data <- data.frame(
+  population = population,
+  Average_HH_Size = Average_HH_Size,
+  Number_of_HH = Number_of_HH,
+  monthly_income = monthly_income,
+  percent_need_housing_upgrades = percent_need_housing_upgrades,
+  rent = rent,
+  market_prices = market_prices
 )
+analysis_data <- analysis_data[apply(analysis_data, 1, function(row) all(row >= 0)), ]
 
 
 #### Save data ####
-write_csv(analysis_data, "data/00-simulated_data/simulated_data.csv")
+write_parquet(analysis_data, "data/00-simulated_data/simulated_data.paquet")
