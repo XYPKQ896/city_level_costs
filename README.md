@@ -20,5 +20,5 @@ The repo is structured as:
 ## Statement on LLM usage
 
 Aspects of the code were written with the help of the auto-complete tool, 
-GPT-4o mini. The abstract and introduction were written with the help of 
+GPT-4o mini. The abstract and introduction， result, discussion, survey were written with the help of 
 GPT-4o mini and the entire chat history is available in other/llm_usage/usage.txt.
