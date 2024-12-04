@@ -1,14 +1,17 @@
 ---
-title: "Analyzing the Relationship Between socioeconomic factors and Governance Costs"
-subtitle: "A Study of population, income, living, price m public spaces and governance cost"
+title: "Drivers of Urban Housing Prices"
+subtitle: "Analyzing Population, Income, and Housing Demand Dynamics"
 author: 
   - Rui Hu
-thanks: "Code and data are available at: [https://github.com/XYPKQ896/city_level_costs](https://github.com/XYPKQ896/city_level_costs)."
-Date: 11 November 2024
+thanks: "Code and data are available at: [https://github.com/XYPKQ896/housing_price](https://github.com/XYPKQ896/housing_price)."
+date: 27 November 2024
 date-format: long
-abstract: "This study analyzes urban housing markets based on data from multiple cities, focusing on the relationship between population, size, household, income, public space availability, housing needs, market prices, and governance costs. The key variables included in this analysis are City, Country, Population, Household Size, Number of Households, Monthly Income, Existing Open Space, Public Space Costs, Percentage of Households in Need of Housing Upgrades, Market Prices, Rent, Total Housing Costs, and Governance Costs. This paper explores how these variables interact and the potential implications for urban planning and governance."
+abstract: "This paper examines the factors influencing urban housing prices, focusing on demographic, economic, and market dynamics. We analyze key drivers such as population growth, household characteristics, income levels, housing demand, and rental prices. Our findings reveal how these variables interact to shape housing market trends and affordability. Understanding these relationships provides valuable insights for policymakers and stakeholders to address urban housing challenges and improve housing accessibility."
 format: pdf
 number-sections: true
+toc: true
+toc-title: "Table of Contents" 
+toc-depth: 3 
 bibliography: references.bib
 ---
 
@@ -19,18 +22,22 @@ bibliography: references.bib
 
 library(tidyverse)
 library(ggplot2)
-data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
+library(arrow)
+library(broom)
+library(knitr)
+data <- read_parquet(here::here("data/02-analysis_data/analysis_data.parquet"))
 ```
 
 
 # Introduction
 
-Urbanization has led to significant transformations in city structures and living conditions, placing pressure on housing markets and governance systems. As cities grow, the challenge of providing affordable housing, maintaining public spaces, and ensuring efficient governance becomes more complex. In this study, we analyze key variables such as population size, household income, housing market prices, public space availability, and governance costs in several cities. Our goal is to examine how these factors interrelate and provide insight into the broader implications for urban planning and policy.
+Urban housing prices are shaped by a complex interplay of demographic, economic, and market factors. Cities worldwide face unique challenges as population growth, changing household structures, income levels, and rental market dynamics influence housing demand and affordability. Understanding these variables is essential for unraveling the underlying mechanisms of urban housing price fluctuations and addressing persistent housing market issues.
 
-The primary estimand of this study is the relationship between household income, population size, housing affordability, and governance costs in urban areas. By examining variables such as the average household size, monthly income, the percentage of households in need of housing upgrades, and the associated costs of governance and public space maintenance, we aim to quantify how these factors influence the overall housing market and urban governance efficiency.
-Results paragraph
+This study aims to estimate the relative influence of six critical factors—population size, household size, number of households, monthly income, housing upgrade demand, and rental prices—on urban housing prices. By analyzing these variables, we identify their individual contributions and interactions in shaping housing markets.
 
-Understanding the relationship between income, housing demand, public space, and governance costs is crucial for designing urban policies that promote affordable housing and sustainable development. As cities continue to grow, failing to address these issues can lead to higher inequality, increased housing costs, and greater governance burdens. Insights from this study can help city planners and policymakers make informed decisions that balance growth with livability and fairness.
+The analysis reveals that several factors significantly influence the average market price of housing. Population size has a negative impact on housing prices, with a substantial decrease in price associated with population growth. Additionally, both the average household size and the number of households are positively related to housing prices, with larger household sizes and more households driving up market prices. Monthly income also has a positive effect on housing prices, indicating that higher income levels are associated with higher housing prices.
+
+These insights are crucial for policymakers and market stakeholders to design targeted interventions that promote housing affordability, stability, and equity in urban areas. By addressing the root causes of housing market pressures, this research contributes to the broader goal of creating sustainable and inclusive cities.
 
 Telegraphing paragraph: The remainder of this paper is structured as follows. 
 @sec-data Data, @sec-model Model, @sec-results Results, @sec-discussion Discussion.
@@ -41,147 +48,338 @@ Telegraphing paragraph: The remainder of this paper is structured as follows.
 ## Overview
 
 We use the statistical programming language R [@citeR] for data analysis. 
-We use @ggplot2 to visualize the data.
-The data used in this study comes from the website [@aiddata]. The article 
-[@Costs_City] includes various socio-economic and urban metrics such as 
-population size, household income, housing costs, and public space availability 
-across different cities. Following the guidelines in Telling Stories with Data 
-[@tellingstories], we consider on the relationship between urban growth, housing 
-markets, public space, and governance costs. Our data captures a range of 
-variables that are integral to understanding the challenges of urban development 
-and housing affordability.
+We use ggplot2 @ggplot2 to visualize the data. We use arrow @R-arrow to read the parquet.
+The data used in this study comes from the website AIDDATA [@aiddata]. The article 
+[@costs_City] includes national census data, housing market surveys, and rental market reports. Following the guidelines in Telling Stories with Data 
+[@tellingstories], we focus on key variables such as population size, household size, number of households, monthly income, housing upgrade demand, and rental prices to capture the multifaceted nature of urban housing markets. The dataset spans urban areas in various regions, providing a broad perspective on housing price dynamics.
+
+The preview of the original and cleaned dataset can be found in Appendix. @sec-additional_data
 
 ## Measurement
 	
-The data entries are a representation of real-world phenomena, such as 
-population, size and household income, which have been translated into 
-quantitative metrics through surveys and official records. For example, 
-population data comes from census reports, while housing-related variables, 
-such as the Average Monthly Rent of an Adequate Home, are sourced from market 
-assessments. Each variable has been carefully measured to ensure that it 
-accurately reflects the conditions in the cities under study.
+To translate real-world phenomena into dataset entries, we employ standardized metrics and definitions. Population size is measured as the total number of residents in an urban area, while household size represents the average number of people per household, derived from census microdata. The number of households is computed by dividing the total population by the household size.
+Monthly income is represented by low quantile income at the city level, adjusted for inflation and regional purchasing power. Housing upgrade demand is quantified as the percentage of households expressing a preference for moving to larger or higher-quality homes, based on survey responses. Finally, rental prices reflect the average monthly rent of an adequate home 550 SqFt per month, serving as a proxy for rental market trends.
+Data cleaning and validation processes ensure consistency across variables, and missing values are imputed using multiple imputation techniques to minimize bias.
 
 ## Outcome variables
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+
+### Market Prices
+Market prices @fig-market_prices are represented by the average market price of an adequate home of 550 sqft in each urban area. This variable is a direct measure of urban housing costs and reflects the interaction of supply and demand in the housing market.
+
+```{r, fig.pos='H'}
+#| label: fig-market_prices
+#| fig-cap: Market Prices
+#| echo: false
+#| warning: false
+#| message: false
+ggplot(data, aes(x = Average_Market_Price_of_an_Adequate_Home)) +
+  geom_histogram(binwidth = 40000) +
+  labs(
+    title = "Figure 1: Distribution of Market Prices",
+    x = "Market Price (in USD)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+Most of market price of our data is smaller than 10000 USD. It shows a right 
+skewed which displays that a few luxury homes with significantly higher prices.
+
+## Predictor variables
 
 
-### Population 
-Some of our data is of population (@fig-population), from @costs_City. 
+### Population
+Some of our data is of population (@fig-population).
 The total population of each city, which influences demand for housing and public services. Larger populations are often correlated with higher demand for housing and more complex governance challenges.
 
-```{r}
+```{r, fig.pos='H'}
 #| label: fig-population
 #| fig-cap: Population across cities.
 #| echo: false
 ggplot(data = data, aes(x = City, y = Population)) +
   geom_bar(stat = "identity") +
   theme_minimal() +
-  labs(title = "Population Size Across Cities", x = "City", y = "Population Size") +
+  labs(title = "Figure 2: Population Size Across Cities", x = "City", y = "Population Size") +
   theme(axis.text.x = element_blank()) 
 ```
 
 This variable shows the distribution of population across different cities, revealing notable variation between them. The city with the largest population is significantly larger than the others.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+### Size
+The overall size of a city (@fig-size) is a measure of the geographical area or population density of an urban area. It is an important factor influencing housing markets, as larger cities often have higher demand for housing due to more concentrated economic opportunities and services. City size was derived from official urban area boundaries and population density data, typically measured in square miles or kilometers, and is often correlated with higher housing prices due to demand-supply imbalances.
+```{r, fig.pos='H'}
+#| label: fig-size
+#| fig-cap: Size across cities.
 #| echo: false
-#| warning: false
-#| message: false
-
+ggplot(data, aes(x = Size)) +
+  geom_bar() +
+  labs(title = "Figure 3: Distribution of City Size Categories",
+       x = "City Size Category", 
+       y = "Frequency") +
+  theme_minimal()
 
 ```
-
-Talk way more about it. 
-
-## Predictor variables
-
-Add graphs, tables and text.
-
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+Medium-sized cities have the highest frequency, appearing significantly more frequently than the "Large" and "Small" categories.
+Large cities appear the least frequently, with fewer cities falling into this category compared to the other two.
+Small cities show a moderate frequency, falling between the other two categories.
 
 
+### Average Household Size
+Average Household Size represents the average number of individuals living in a single household. Smaller household sizes often lead to an increased number of households, elevating housing demand. Calculated directly from census microdata, this measure captures changes in household formation trends.
+```{r, fig.pos='H'}
+#| echo: false
+# Calculate summary statistics for Average_HH_Size
+summary_stats <- summary(data$Average_HH_Size)
+
+# Convert the summary output into a data frame for kable
+summary_stats_df <- as.data.frame(matrix(summary_stats, ncol = 1, dimnames = list(names(summary_stats), "Value")))
+
+# Render the summary statistics table
+summary_stats_df %>% kable(caption = "Summary Statistics for Average Household Size")
+```
+In conclusion, these statistics suggest that urban areas in the dataset tend to have moderately sized households, with a slight tendency towards larger household sizes in the upper quartile.
 
 
+### Number of Households
+Number of Households @fig-number_of_HH is derived by dividing the total population by the average household size. It serves as a direct measure of housing unit demand in each urban area.
+```{r, fig.pos='H'}
+#| label: fig-number_of_HH
+#| fig-cap: Number of Households.
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data, aes(x = Population, y = Number_of_HH)) +
+  geom_point() +  
+  geom_smooth(method = "lm") + 
+  labs(
+    title = "Figure 4: Relationship between Population Size and Number of Households",
+    x = "Population",
+    y = "Number of Households"
+  ) +
+  theme_minimal() 
+
+```
+This plot confirms that population size is a strong predictor of the number of households in urban areas. It validates the expectation that larger populations generally lead to more households, which directly impacts housing demand and urban planning. However, the variability in the relationship at higher population sizes suggests that additional factors, such as average household size or regional housing policies, might play a role and could be investigated further.
 
 
+### Monthly Income
+Monthly income @fig-Monthly_Income is the average monthly household income of the lowest quintile of Population in each urban area. This variable is critical for assessing housing affordability and purchasing power in the market.
+
+```{r, fig.pos='H'}
+#| label: fig-Monthly_Income
+#| fig-cap: Monthly Income.
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data, aes(x = Monthly_Income)) +
+  geom_histogram(binwidth = 8000) +
+  labs(
+    title = "Figure 5: Distribution of Monthly Income Across Cities",
+    x = "Monthly Income (in USD)",
+    y = "Frequency"
+  ) +
+  theme_minimal() 
+
+```
+The histogram shows that most monthly incomes are clustered on the lower end (below $5,000).
+The distribution is right-skewed, indicating a smaller number of individuals or households with significantly higher incomes.
+Monthly incomes range widely, from near $0 to over $15,000. This wide range signifies diverse economic conditions across cities, potentially driven by city size, industrial composition, or cost of living.
+
+
+### Percentage of Households Needing Housing Upgrades
+Percentage of Households Needing Housing Upgrades @fig-upgrades reflects the proportion of households expressing a desire to move to larger or higher-quality homes. It captures the aspirational demand for improved housing conditions, which can drive housing market activity. Survey data were used to compute these percentages at the city level.
+```{r, fig.pos='H'}
+#| label: fig-upgrades
+#| fig-cap: Monthly Income.
+#| echo: false
+#| message: false
+#| warning: false
+summary_table <- data %>%
+  group_by(Size) %>%
+  summarise(
+    Total_Households = sum(Number_of_HH, na.rm = TRUE),
+    percentage_Needing_Upgrades = mean(Percentage_of_HH_in_Need_of_Adequate_Housing_Upgrades)
+  ) %>%
+  mutate(Needing_Upgrades = Total_Households * percentage_Needing_Upgrades)
+
+# Create a formatted table
+knitr::kable(
+  summary_table,
+  col.names = c("Size", "Total Households", "Percentage Needing Upgrades (%)", "Households Needing Upgrades"),
+  caption = "Percentage of Households Needing Housing Upgrades by Size",
+  digits = 2
+)
+```
+Households in the small cities are willing to upgrades their home. Households in the medium city has a smaller
+preference to upgrade the home.
+
+
+### Montly Rent
+Monthly rent @fig-Monthly_rent means the average monthly rent of an adequate home 550 SqFt per month. This measure captures housing demand and serves as a proxy for housing affordability.
+```{r, fig.pos='H'}
+#| label: fig-Monthly_rent
+#| fig-cap: Monthly Income.
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data, aes(x = Average_Monthly_Rent_of_an_Adequate_Home)) +
+  geom_histogram(binwidth = 2000) +
+  labs(
+    title = "Figure 7: Distribution of Monthly Rent Across Cities",
+    x = "Monthly Rent (in USD)",
+    y = "Frequency"
+  ) +
+  theme_minimal() 
+
+```
+The distribution is heavily right-skewed, with a majority of values concentrated at the lower end of the range.
+A large number of cities have monthly rents clustered around $0–$1250, indicating relatively affordable housing in many areas.
 
 
 # Model{#sec-model}
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+The goal of our modeling strategy is twofold. Firstly, we aim to quantify the relationships between various demographic and housing market characteristics and the average market price of an adequate home. Secondly, we use this model to identify key predictors that could inform housing policy and urban planning. The chosen model combines demographic, economic, and housing variables to provide a comprehensive understanding of market dynamics. Background details and diagnostics are included in [Appendix - @sec-model-details].
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+Define $y_i$ as the average market price of an adequate home for city $i$, measured in USD. The predictor variables include:
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
+- $x_{1i}$: Population size of city $i$.
+- $x_{2i}$: Size of city $i$ (e.g., small, medium, or large).
+- $x_{3i}$: Average household size in city $i$.
+- $x_{4i}$: Total number of households in city $i$.
+- $x_{5i}$: Average monthly income in USD for city $i$.
+- $x_{6i}$: Percentage of households needing adequate housing upgrades in city $i$.
+- $x_{7i}$: Average monthly rent for an adequate home in city $i$.
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+The linear regression model is defined as:
+
+$y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{3i} + \beta_4 x_{4i} + \beta_5 x_{5i} + \beta_6 x_{6i} + \beta_7 x_{7i}$
+
+where:
+- $\beta_0$ is the intercept.
+
+- $\beta_1, \dots, \beta_7$ are the coefficients corresponding to the predictors.
+
+We run the model in R [@citeR] using the `lm()` function from the base R package.
 
 
 ### Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+The predictors were selected based on their theoretical relevance to housing market prices. Key assumptions include:
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
+1. Population ($x_{1i}$): Larger populations may increase housing demand, driving prices higher.
+2. City size ($x_{2i}$): Larger cities often experience higher housing prices due to limited land and increased demand.
+3. Household size ($x_{3i}$): Larger households may influence the demand for larger homes, potentially increasing prices.
+4. Number of households ($x_{4i}$): This variable captures the housing supply-demand balance, which impacts pricing.
+5. Income ($x_{5i}$): Cities with higher average incomes often experience greater purchasing power, increasing housing demand.
+6. Housing upgrade needs ($x_{6i}$): A higher percentage of inadequate housing could depress prices if supply quality is low.
+7. Rent ($x_{7i}$): Rent prices often correlate with home prices, acting as a proxy for housing affordability.
 
 
 # Results{#sec-results}
 
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
+Our results are summarized in @tbl-modelresults which presents the coefficients of the explanatory model predicting the average market price of an adequate home. @broom is used to tidy the model. @knitr is used to kable the table.
+The statistically significant is p<0.05.
+The model reveals several important insights and indicates a baseline average market price of $40,500 when all predictor variables are at their reference levels or zero. Among the predictor variables:
 
 
-```
-
-```{r}
+```{r, fig.pos="h"}
 #| echo: false
 #| eval: true
 #| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
+#| tbl-cap: "Explanatory models of average market price"
 #| warning: false
 
+# Create a summary table of the model results
+model1 <- readRDS(here::here("models/second_model.rds"))
+
+model_results <- tidy(model1) %>%
+  mutate(
+    term = case_when(
+      term == "(Intercept)" ~ "Intercept",
+      term == "Population" ~ "Population",
+      term == "SizeMedium" ~ "Size: Medium (Ref: Large)",
+      term == "SizeSmall" ~ "Size: Small (Ref: Large)",
+      term == "Average_HH_Size" ~ "Average Household Size",
+      term == "Number_of_HH" ~ "Number of Households",
+      term == "Monthly_Income" ~ "Monthly Income",
+      term == "Percentage_of_HH_in_Need_of_Adequate_Housing_Upgrades" ~ "Percentage of Households Needing Upgrades",
+      term == "Average_Monthly_Rent_of_an_Adequate_Home" ~ "Average Monthly Rent",
+      TRUE ~ term
+    )
+  )
+
+# Format the table
+kable(
+  model_results[, c("term", "estimate", "std.error", "statistic", "p.value")],
+  col.names = c("Predictor", "Estimate", "Std. Error", "t value", "Pr(>|t|)"),
+  digits = 3
+)
 
 ```
+Intercept: The intercept has an estimate of -1592.501 (p=0.002), suggesting a baseline adjustment for average market prices when all predictors are held constant.
+
+Population: The coefficient for population is -11123.163 (p=0.002), indicating that increases in population are associated with a significant negative impact on market prices, possibly reflecting supply pressures or urban constraints.
+
+City Size:
+Medium cities (compared to large cities) have an insignificant positive estimate of 0.057 (p=0.230).
+Small cities have a negligible and statistically insignificant estimate of -0.001 (p=0.986), indicating that city size may not strongly predict market prices when controlling for other factors.
+
+Average Household Size: With an estimate of 764.739 (p=0.002), this variable significantly impacts market prices positively, suggesting that larger household sizes may be associated with higher market values.
+
+Number of Households: The coefficient is 11946.141 (p=0.002), showing a significant positive association between the number of households and market prices, possibly reflecting demand pressures.
+
+Monthly Income: With an estimate of 0.696 (p=0.003), higher monthly income is significantly associated with higher market prices, consistent with economic theory linking income levels to housing affordability.
+
+Percentage of Households Needing Upgrades: This variable has an estimate of 0.085 (p=0.182), suggesting a positive but statistically insignificant relationship.
+
+Average Monthly Rent: The coefficient is 0.547 (p=0.078), which approaches significance, indicating that higher rents may predict higher market prices.
 
 
 
 
 # Discussion{#sec-discussion}
 
-## First discussion point {#sec-first-point}
+## The Relationship Among Population and Market Price {#sec-first-point}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+The analysis indicates a significant negative relationship between population size and average market prices for adequate homes ($\beta$=−11,123.163,p=0.002). This finding suggests that, contrary to conventional wisdom, larger populations are associated with lower average housing prices.
 
-## Second discussion point
+Population size is often linked to urban agglomeration, where economic opportunities attract a broad spectrum of residents. While demand increases, cities with larger populations may also benefit from broader tax bases and investment in affordable housing initiatives that temper price growth.
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+## The Relationship Between Average Household Size and Market Price
 
-## Third discussion point
+The analysis reveals a statistically significant positive relationship between average household size and the average market price for adequate homes ($\beta$=764.739,p=0.002). This finding suggests that, as the average household size increases, so does the market price for housing in that area.
+
+Larger households often require more space, which can drive up demand for bigger homes. In many urban areas, larger households may have a higher propensity to purchase or rent larger, more expensive homes, thereby increasing the average market price.
+
+## The Relationship Between Number of Household and Market Price
+
+The analysis shows a statistically significant positive relationship between the number of households and the average market price for adequate homes ($\beta$=11,946.141,p=0.002). This suggests that as the number of households increases, the average market price of homes also tends to rise.
+
+As the number of households in an area grows, the demand for housing naturally increases. More households mean a greater need for available housing units, which can push prices up, especially in areas where supply is limited.
+A larger number of households creates greater competition for the available housing stock. This heightened competition can lead to higher prices, particularly in areas with constrained housing supply. When the number of households exceeds the number of available units, bidding wars or higher rents can drive up market prices.
+
+## The Relationship Between Monthly Income and Market Price
+The analysis reveals a statistically significant positive relationship between monthly income and the average market price of homes ($\beta$=0.696,p=0.003). This indicates that as monthly income increases, the market price for adequate homes tends to rise.
+
+Higher monthly income increases individuals' purchasing power, allowing them to afford more expensive homes. As income levels rise, people are more willing and able to bid for higher-quality homes, which in turn pushes up the average market price.
+In regions with higher average monthly incomes, there is often a demand for larger, more luxurious homes. This is particularly true in affluent urban centers where wealthier individuals tend to live, which raises the overall market price. Such areas are more likely to experience an increase in the availability of higher-end properties, contributing to a higher average home price.
 
 ## Weaknesses and next steps
 
-Weaknesses and next steps should also be included.
+Despite the valuable insights provided by the model, there are several weaknesses that limit the comprehensiveness and robustness of the analysis. Additionally, several next steps can be taken to address these limitations and improve our understanding of housing market dynamics.
+
+Weaknesses
+Model Simplification and Omitted Variables
+One significant weakness of the current model is its simplification. While it includes several key predictors such as Monthly Income, Monthly Rent, and Household Size, there may be other important variables influencing housing prices that were not included in the model. Factors such as interest rates, government policies, zoning laws, and infrastructure development are likely to play a significant role in shaping housing prices. The omission of these variables could lead to omitted variable bias, potentially distorting the model’s findings. The lack of certain unobserved variables, such as neighborhood-level amenities, crime rates, and future growth projections, also limits the model’s predictive power.
+
+Next Steps
+Incorporating Additional Variables
+To address the limitation of omitted variables, future research should aim to incorporate additional predictors such as interest rates, tax policies, neighborhood-level amenities, and zoning regulations. These factors are often highly correlated with housing prices and would provide a more comprehensive understanding of what drives housing markets. Moreover, including time-varying factors could capture the evolving nature of housing markets.
+
+In conclusion, while this model provides valuable insights into the relationship between income, rent, and housing prices, there are several limitations that should be addressed in future research. By incorporating more data, addressing multicollinearity, and improving the model’s assumptions, we can create a more robust and comprehensive framework for understanding housing market dynamics.
 
 \newpage
 
@@ -190,49 +388,192 @@ Weaknesses and next steps should also be included.
 # Appendix {-}
 
 
-# Additional data details
+# Additional data details {#sec-additional_data}
+Preview of the raw dataset
+```{r, fig.pos="h"}
+#| label: tbl-raw
+#| tbl-cap: "Preview of the raw dataset"
+#| message: false
+#| echo: false
+raw <- read_csv(here::here("data/01-raw_data/original_data.csv"))
+head(raw)[1:5] %>% kable()
+head(raw)[6:7] %>% kable()
+head(raw)[8:9] %>% kable()
+head(raw)[10:13] %>% kable()
+head(raw)[14:16] %>% kable()
+head(raw)[17:20] %>% kable()
+head(raw)[21:23] %>% kable()
+head(raw)[24:25] %>% kable()
+head(raw)[26:27] %>% kable()
+head(raw)[28:30] %>% kable()
+head(raw)[31:31] %>% kable()
+head(raw)[32:34] %>% kable()
+head(raw)[34:36] %>% kable()
+head(raw)[37:38] %>% kable()
+```
+Preview of the cleaned dataset
+```{r, fig.pos="h"}
+#| label: tbl-cleaned
+#| tbl-cap: "Preview of the raw dataset"
+#| message: false
+#| echo: false
+head(data)[1:5] %>% kable()
+head(data)[6:7] %>% kable()
+head(data)[8:8] %>% kable()
+head(data)[9:9] %>% kable()
+head(data)[10:10] %>% kable()
+```
 
 # Model details {#sec-model-details}
 
-## Posterior predictive check
+## Check the violation assumptions of original model.
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+In @fig-first-1 we implement a residual vs. fitted value plot. This shows clustering of residuals in certain ranges of fitted values, with uneven dispersion in others. This violates constant variance assumption.
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+In @fig-first-2 we draw a QQ plot. This shows the deviation at the extremes indicates the presence of outliers or non-normality in the residuals, which could bias parameter estimates and predictions.It violates normality assumption.
 
-```{r}
-#| eval: true
+```{r, fig.pos='H'}
 #| echo: false
 #| message: false
 #| warning: false
-#| label: fig-ppcheckandposteriorvsprior
+#| label: fig-first
 #| layout-ncol: 2
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-
+#| fig-pos: "h"
+model <- readRDS(here::here("models/first_model.rds"))
+plot(model$fitted.values, resid(model), 
+     xlab = "Fitted Values", 
+     ylab = "Residuals", 
+     main = "Residuals vs Fitted")
+qqnorm(resid(model))
+qqline(resid(model))
 ```
 
-## Diagnostics
+## Check the violation assumptions of transfered model.
+By applying Box-cox transformation to the first model. We get the second model.
+Now, we want to check the assumptions of second model.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+@fig-second-1 is a Residual vs. fited value plot. It shows that The residuals appear to be randomly distributed around zero, without a clear pattern. Also, the spread of residuals does not seem to systematically increase or decrease with the fitted values.
+This suggests that the model does not violate uncorrelated, linearity or  constant variance assumptions.
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+@fig-second-2 is a QQ plot. It shows that all the points are located near the line.
 
-```{r}
+This suggests that the model does not violate normality assumption.
+
+```{r, fig.pos='H'}
 #| echo: false
-#| eval: true
 #| message: false
 #| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
+#| label: fig-second
+#| fig-cap: "Checking the second model"
+#| fig-pos: "h"
+model1 <- readRDS(here::here("models/second_model.rds"))
+plot(model1$fitted.values, resid(model1), 
+     xlab = "Fitted Values", 
+     ylab = "Residuals", 
+     main = "Residuals vs Fitted")
+qqnorm(resid(model1))
+qqline(resid(model1))
 
 ```
 
+# Survey
+In studying the drivers of urban housing prices, survey data plays a critical role in understanding household-level factors such as income, housing preferences, and rental demand. To ensure representativeness and minimize bias in the dataset, careful attention must be paid to the sampling methodology employed. 
 
+Urban households in metropolitan areas with a population of over 500,000. The survey aims to sample a diverse range of households across different income levels, family sizes, and housing types.
+
+Sample Size
+1,000 households, stratified by:
+
+Income level (low, middle, high)
+Housing type (owned, rented, subsidized)
+Geographic distribution (central, suburban, peripheral areas)
+Survey Method
+Online and phone-based surveys, supplemented by in-person interviews for underserved populations.
+
+Survey Questions
+Demographic Information
+
+What is the size of your household? (1, 2, 3–4, 5+)
+
+What is your household’s annual income? (Less than $30,000, $30,000–$60,000, $60,000–$100,000, $100,000+)
+
+What is your highest education level? (High school, Associate's, Bachelor's, Graduate)
+
+Housing Information
+
+Do you own or rent your current residence? (Own, Rent, Other)
+
+What is the monthly cost of your housing (including mortgage/rent, utilities)?
+
+Less than $500
+
+$500–$1,000
+
+$1,000–$2,000
+
+$2,000+
+
+What type of housing do you live in? (Apartment, Single-family home, Townhouse, Other)
+
+Housing Market Perceptions
+
+Over the past year, do you feel housing prices in your area have:
+
+Increased significantly
+
+Increased slightly
+
+Remained stable
+
+Decreased
+
+How would you rate the affordability of housing in your area? (1 = Very unaffordable, 5 = Very affordable)
+Demand Dynamics
+
+Are you planning to move or upgrade your housing within the next year? (Yes, No, Unsure)
+
+What factors are influencing your decision to move/upgrade? (Check all that apply)
+
+Income changes
+
+Family size changes
+
+Better location
+
+Housing affordability
+
+Job relocation
+
+Additional Context
+
+How far is your residence from your workplace/school? (Less than 5 miles, 5–10 miles, 10–20 miles, 20+ miles)
+
+How much time do you spend commuting daily?
+
+Less than 30 minutes
+
+30–60 minutes
+
+60+ minutes
+
+Ethical Considerations
+
+Ensure participant confidentiality and anonymity.
+
+Provide participants with informed consent forms outlining the purpose of the survey and data usage.
+
+Allow participants to withdraw from the survey at any time.
+
+Data Analysis
+
+The collected data will be used to:
+
+Analyze the relationship between household demographics and housing costs.
+
+Identify factors that influence perceptions of housing affordability.
+
+Model housing price variations across urban areas.
 
 \newpage
 
