@@ -10,7 +10,6 @@
 
 #### Workspace setup ####
 library(tidyverse)
-library(rstanarm)
 
 #### Read data ####
 analysis_data <- read_parquet("data/02-analysis_data/analysis_data.parquet")
@@ -20,7 +19,7 @@ model <- lm(formula = Average_Market_Price_of_an_Adequate_Home ~ Population +
               Size + Average_HH_Size + Number_of_HH + Monthly_Income + 
               Percentage_of_HH_in_Need_of_Adequate_Housing_Upgrades + 
               Average_Monthly_Rent_of_an_Adequate_Home, data = analysis_data)
-
+summary(model)
 
 #### Save model ####
 saveRDS(
